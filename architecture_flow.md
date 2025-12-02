@@ -1,94 +1,105 @@
-# DocuMinds: Multi-Agent Document Processing Workflow
+graph TB
+    Start([Document Upload]) --> Router[Router Agent<br/>Complexity Assessment]
+    Router --> SimplePath[Simple Processing Path]
+    Router --> ComplexPath[Complex Processing Path]
 
-## System Overview
+    SimplePath --> Extractor[Extractor Agent<br/>Data Extraction]
+    Extractor --> Summarizer[Summarizer Agent<br/>Content Summary]
+    Summarizer --> Output[Generate Output]
 
-DocuMinds is an intelligent document processing system that leverages multi-agent collaboration to automate document analysis, extraction, and summarization tasks. The system implements several emerging design patterns for multi-agent AI systems.
+    ComplexPath --> Orchestrator[Orchestrator Agent<br/>Workflow Planning]
+    Orchestrator --> Extractor2[Extractor Agent<br/>Deep Analysis]
+    Extractor2 --> Analyzer[Analyzer Agent<br/>Content Analysis]
+    Analyzer --> Validator[Validator Agent<br/>Quality Check]
+    Validator --> Summarizer2[Summarizer Agent<br/>Insight Generation]
+    Summarizer2 --> Output2[Generate Output]
 
-## Architecture Components
+    Output --> Memory[Save to Federated Memory]
+    Output2 --> Memory2[Save to Federated Memory]
 
-### Core Agents
+    Memory --> End([Complete])
+    Memory2 --> End2([Complete])
 
-1. **Router Agent**
-   - **Purpose**: Initial document classification and routing
-   - **Key Functions**:
-     - Document complexity assessment
-     - Processing path determination
-     - Resource allocation optimization
-   
-2. **Orchestrator Agent**
-   - **Purpose**: Workflow coordination and management
-   - **Key Functions**:
-     - Dynamic workflow planning
-     - Agent coordination
-     - Exception handling and recovery
+    style Start fill:#90EE90
+    style End fill:#FFB6C1
+    style End2 fill:#FFB6C1
+    style Router fill:#FFE66D
+    style Orchestrator fill:#4ECDC4
 
-3. **Extractor Agent**
-   - **Purpose**: Data extraction from documents
-   - **Key Functions**:
-     - Structured data identification
-     - Multi-format document processing
-     - Key information extraction
+   graph LR
+    subgraph "External API Layer"
+        API[OpenAI GPT-4 API]
+    end
 
-4. **Analyzer Agent**
-   - **Purpose**: Deep content analysis
-   - **Key Functions**:
-     - Compliance checking
-     - Risk assessment
-     - Pattern recognition
+    subgraph "Control Layer"
+        Router[Router Agent<br/>Document Classification]
+        Orchestrator[Orchestrator Agent<br/>Workflow Management]
+        Memory[Federated Memory<br/>Knowledge Base]
+    end
 
-5. **Summarizer Agent**
-   - **Purpose**: Content summarization and insight generation
-   - **Key Functions**:
-     - Executive summary generation
-     - Key insight extraction
-     - Action item identification
+    subgraph "Processing Agent Layer"
+        Extractor[Extractor Agent<br/>Data Extraction]
+        Analyzer[Analyzer Agent<br/>Content Analysis]
+        Summarizer[Summarizer Agent<br/>Insight Generation]
+        Validator[Validator Agent<br/>Quality Assurance]
+    end
 
-6. **Validator Agent**
-   - **Purpose**: Output quality assurance
-   - **Key Functions**:
-     - Accuracy validation
-     - Consistency checking
-     - Quality scoring
+    subgraph "Storage Layer"
+        Redis[Redis Cache]
+        Postgres[PostgreSQL Database]
+    end
 
-### Supporting Systems
+    Router --> Orchestrator
+    Router --> Memory
+    Orchestrator --> Extractor
+    Orchestrator --> Analyzer
+    Orchestrator --> Summarizer
+    Orchestrator --> Validator
 
-1. **Federated Memory System**
-   - Perspective-based information retrieval
-   - Agent-specific memory indexing
-   - Cross-agent knowledge sharing
+    Extractor --> API
+    Analyzer --> API
+    Summarizer --> API
+    Validator --> API
 
-2. **Chain of Custody**
-   - Complete audit trail
-   - Decision reasoning capture
-   - Interaction logging
+    API -.Return Analysis.-> Extractor
+    API -.Return Analysis.-> Analyzer
+    API -.Return Analysis.-> Summarizer
+    API -.Return Analysis.-> Validator
 
-## Design Patterns Implemented
+    Memory --> Redis
+    Memory --> Postgres
 
-### 1. Orchestrator-Specialist Pattern
-- Central orchestrator interprets task complexity
-- Delegates to specialized agents based on cognitive requirements
-- Enables dynamic resource allocation
+    style Router fill:#FFE66D
+    style API fill:#FF6B6B
+    style Orchestrator fill:#4ECDC4
 
-### 2. Adaptive Routing Pattern
-- Fast classification for resource optimization
-- Routes simple tasks to lightweight agents
-- Reserves powerful agents for complex tasks
+    sequenceDiagram
+    participant User as User
+    participant API as FastAPI Server
+    participant Router as Router Agent
+    participant Extractor as Extractor Agent
+    participant Summarizer as Summarizer Agent
+    participant Memory as Federated Memory
+    participant GPT as OpenAI API
 
-### 3. Verification Loop Pattern
-- Independent validation of agent outputs
-- Quality-aware fallbacks
-- Continuous improvement through feedback
+    User->>API: Upload Document
+    API->>Router: Send Document Data
+    
+    rect rgb(240, 240, 240)
+        Note over Router: Complexity Assessment
+        Router->>Router: Analyze document type
+        Router->>Router: Calculate complexity score
+        Router->>Router: Choose processing path
+    end
 
-### 4. Memory Federation Pattern
-- Agent-specific memory perspectives
-- Context-aware information retrieval
-- Shared knowledge base with personalized views
+    Router->>Extractor: Route to Simple Path
+    Extractor->>GPT: Request data extraction
+    GPT-->>Extractor: Return extracted data
+    Extractor->>Summarizer: Send extracted data
 
-### 5. Chain-of-Custody Pattern
-- Complete decision audit trail
-- Reasoning capture for debugging
-- Accountability tracking
+    Summarizer->>GPT: Request summary generation
+    GPT-->>Summarizer: Return generated summary
+    Summarizer->>Memory: Store processing results
+    Memory-->>API: Confirm storage
 
-## Workflow Examples
-
-### Simple Document Processing
+    API-->>User: Return final output
